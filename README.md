@@ -12,8 +12,8 @@ Bluetooth
 	
 	
 Steps to install Citi-Pretotype on a MAC:
-1.	[Install NPM] (http://blog.teamtreehouse.com/install-node-js-npm-mac)
-2.	Navigate to folder of pretotype
-2.	run 'npm install' in terminal
-3.	run 'node app.js' in terminal
-4.	Watch Sas's awesome pretotype run
+1.  [Install NPM] (http://blog.teamtreehouse.com/install-node-js-npm-mac)
+2.  Navigate to folder of pretotype
+3.  run 'npm install' in terminal
+4.  run 'node app.js' in terminal
+5.  Watch Sas's awesome pretotype run
