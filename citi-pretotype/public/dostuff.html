@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Authenticating</title>
+
+    <!-- Bootstrap Core CSS - Uses Bootswatch Flatly Theme: http://bootswatch.com/flatly/ -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/freelancer.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet"
+          type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body id="page-top" class="index">
+
+<!-- Navigation -->
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#page-top">Authenticating You....</a>
+        </div>
+
+
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container-fluid -->
+</nav>
+
+<!-- Header -->
+<section class="success">
+    <div class="container" style="height: 100px">
+        <img src="./img/Citi.png" class="text-center">
+
+    </div>
+</section>
+
+<!-- Portfolio Grid Section -->
+
+
+<!-- About Section -->
+<section class="success" id="about">
+    <div class="container">
+        <div class="row">
+            <!--<div class="col-sm-6 " id="steps">-->
+            <!--<h2>step 1 <i class="fa  fa-fw fa-cogs"></i></h2>-->
+            <!--<h2>step 2 <i class="fa fa-fw fa-cogs"></i></h2>-->
+            <!--<h2>step 3 <i class="fa fa-fw fa-cogs"></i></h2>-->
+            <!--<h2>step 4 <i class="fa fa-fw fa-cogs"></i></h2>-->
+            <!--<h2>step 5 <i class="fa fa-fw fa-cogs"></i></h2>-->
+            <!--</div>-->
+            <div class="col-sm-6 " id="steps">
+                <h2>Step 1 <i class="fa fa-tablet"></i> <i class="fa  fa-fw fa-cogs"></i></h2>
+
+                <h2>Step 2 <i class="fa fa-microphone"></i> <i class="fa fa-fw fa-cogs"></i></h2>
+
+                <h2>Step 3 <i class="fa fa-map-marker"></i> <i class="fa fa-fw fa-cogs"></i></h2>
+
+                <h2>step 4 <i class="fa fa-wifi"></i>      <i class="fa fa-fw fa-cogs"></i></h2>
+
+                <h2>step 5 <i class="fa fa-apple"></i> <i class="fa fa-fw fa-cogs"></i></h2>
+            </div>
+            <div class="col-sm-6">
+                <div id="success" style="display: none">
+                    <h2>"Successfully signed in"</h2>
+
+                    <h3>"4 out of 5 steps succeeded :) "</h3>
+                </div>
+                <div id="fail" style="display: none">
+                    <h2>"Failed to authenticate"</h2>
+                    <h3>"4 out of 5 steps failed :("</h3>
+                    <h5>Having trouble? ... request for an One time password, to your email <i class="fa fa-cc"></i></h5>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+
+        </div>
+    </div>
+</section>
+
+
+<!-- Footer -->
+<footer class="text-center">
+    <div class="footer-above">
+        <div class="container">
+
+        </div>
+    </div>
+    <div class="footer-below">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    Copyright &copy; Your Website 2014
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+<div class="scroll-top page-scroll visible-xs visible-sm">
+    <a class="btn btn-primary" href="#page-top">
+        <i class="fa fa-chevron-up"></i>
+    </a>
+</div>
+
+<!-- Portfolio Modals -->
+
+
+<!-- jQuery -->
+<script src="js/jquery.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="js/bootstrap.min.js"></script>
+
+<!-- Plugin JavaScript -->
+<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+<script src="js/classie.js"></script>
+<script src="js/cbpAnimatedHeader.js"></script>
+
+<!-- Contact Form JavaScript -->
+<script src="js/jqBootstrapValidation.js"></script>
+<script src="js/contact_me.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="js/freelancer.js"></script>
+
+
+<script type="text/javascript">
+
+    function getQueryStringParams(sParam) {
+        var sPageURL = window.location.search.substring(1);
+        var sURLVariables = sPageURL.split('&');
+        for (var i = 0; i < sURLVariables.length; i++) {
+            var sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] == sParam) {
+                return sParameterName[1];
+            }
+        }
+    }
+    var m = 5
+    //int n= n out m
+    function authCheck(n, m) {
+
+        m = m || 5
+        var steps = $("#steps");
+        rows = steps.children()
+        var x = []
+
+        rows.each(function (i) {
+            x[i] = $(this)
+            setTimeout(function () {
+                if(n>m/2){
+                    if (i!=1 && i<=n) {
+                        x[i].find('.fa-fw').removeClass('fa-cogs')
+                        x[i].find('.fa-fw').addClass('fa-check-square')
+                    } else {
+                        x[i].find('.fa-fw').removeClass('fa-cogs')
+                        x[i].find('.fa-fw').addClass('fa-remove')
+                    }
+                }else{
+                    if ( i <n) {
+                        x[i].find('.fa-fw').removeClass('fa-cogs')
+                        x[i].find('.fa-fw').addClass('fa-check-square')
+                    } else {
+                        x[i].find('.fa-fw').removeClass('fa-cogs')
+                        x[i].find('.fa-fw').addClass('fa-remove')
+                    }
+                }
+
+
+            }, 1000 * i)
+
+        })
+
+        return n > m / 2
+    }
+
+    function success() {
+        setTimeout(function () {
+            n = getQueryStringParams('n')
+            if (n > m / 2) {
+                $('#success').show();
+            } else {
+                $('#fail').show();
+            }
+
+        }, 5000)
+    }
+
+
+    $(authCheck(getQueryStringParams('n')))
+    $(success())
+
+</script>
+</body>
+
+</html>
