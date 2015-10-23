@@ -28,6 +28,7 @@ build/Release
 node_modules
 bower_components/
 platforms
+android
 plugins
 www/lib/
 bin

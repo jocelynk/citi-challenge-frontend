@@ -1,9 +1,18 @@
 <ion-view view-title="Account">
   <ion-content>
-    <ion-list>
-    <ion-toggle  ng-model="settings.enableFriends">
-        Enable Friends
-    </ion-toggle>
-    </ion-list>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12"><button class="button btn" ng-click="scan()">Scan</button></div>
+      </div>
+      <div class="col-md-12">
+        <span ng-if="showDeviceList">Devices Registered</span>
+        <ion-list>
+          <ion-item class="" ng-repeat="device in devices" type="item-text-wrap" ng-if="showDeviceList">
+            <h2>{{device.name}}</h2>
+            <p>{{device.deviceId}}</p>
+          </ion-item>
+        </ion-list>
+      </div>
+    </div>
   </ion-content>
 </ion-view>
