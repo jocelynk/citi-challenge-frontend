@@ -1,8 +1,8 @@
 angular.module('starter.services', [])
-  .factory('SocketServer', function() {
+  .factory('SocketServer', function () {
     var SocketServer = {};
 
-    SocketServer.server = new WebSocket("ws://10.128.16.213:9000/ws");
+    SocketServer.server = new WebSocket("ws://10.128.5.32:9000/ws");
     SocketServer.server.onopen = function (event) {
       SocketServer.server.send("Message to send");
       console.log(event);
@@ -14,7 +14,7 @@ angular.module('starter.services', [])
 
     };
 
-    SocketServer.server.onclose = function(event) {
+    SocketServer.server.onclose = function (event) {
       console.log(event)
     };
 
@@ -24,7 +24,7 @@ angular.module('starter.services', [])
   .factory('DeviceRegistration', function ($http) {
     var DeviceRegistration = {};
     DeviceRegistration.saveDeviceInfo = function (deviceInfo) {
-      return $http.post('http://10.128.16.213:9000/api/device', deviceInfo);
+      return $http.post('http://10.128.5.32:9000/api/device', deviceInfo);
 
     };
 
@@ -34,58 +34,87 @@ angular.module('starter.services', [])
   .factory('BluetoothDiscovery', function ($http) {
     var BluetoothDiscovery = {};
     BluetoothDiscovery.devices = [];
+    BluetoothDiscovery.pairedDevices = [];
 
-    BluetoothDiscovery.bindCordovaEvents = function() {
+    BluetoothDiscovery.bindCordovaEvents = function () {
       document.addEventListener('bcready', BluetoothDiscovery.onBCReady, false);
     };
 
 
-    BluetoothDiscovery.onBCReady = function() {
-      BC.bluetooth.addEventListener("bluetoothstatechange",BluetoothDiscovery.onBluetoothStateChange);
-      BC.bluetooth.addEventListener("newdevice",BluetoothDiscovery.addNewDevice);
+    BluetoothDiscovery.onBCReady = function () {
+      BC.bluetooth.addEventListener("bluetoothstatechange", BluetoothDiscovery.onBluetoothStateChange);
+      BC.bluetooth.addEventListener("newdevice", BluetoothDiscovery.addNewDevice);
+      BC.Bluetooth.StopScan();
+      BC.Bluetooth.StartScan();
+      BC.Bluetooth.GetPairedDevices(function (mes) {
+        for (var i = 0; i < mes.length; i++) {
+          BluetoothDiscovery.pairedDevices.push(mes[i].deviceAddress);
+        }
+      });
     };
 
-    BluetoothDiscovery.onBluetoothStateChange = function(){
-      if(BC.bluetooth.isopen){
+    BluetoothDiscovery.onBluetoothStateChange = function () {
+      if (BC.bluetooth.isopen) {
 
-      }else{
-        if(API !== "ios"){
-          BC.Bluetooth.OpenBluetooth(function(){
+      } else {
+        if (API !== "ios") {
+          BC.Bluetooth.OpenBluetooth(function () {
           });
-        }else{
+        } else {
           //alert("Please open your bluetooth first.");
         }
       }
     };
 
-    BluetoothDiscovery.onBluetoothDisconnect = function(arg){
-      BC.Proximity.clearPathLoss();
-      navigator.notification.stopBeep();
+    BluetoothDiscovery.onBluetoothDisconnect = function (arg) {
+      //BC.Proximity.clearPathLoss();
+      //navigator.notification.stopBeep();
 
     };
 
-    BluetoothDiscovery.onDeviceConnected = function(arg, callback){
+    BluetoothDiscovery.onDeviceConnected = function (arg, callback) {
       var deviceAddress = arg.deviceAddress;
       //if Device connected, logic to send to serve goes here.
 
     };
 
-    BluetoothDiscovery.addNewDevice = function(s){
+    BluetoothDiscovery.addNewDevice = function (s) {
       var newDevice = s.target;
-      newDevice.addEventListener("deviceconnected",BluetoothDiscovery.onDeviceConnected);
-      newDevice.addEventListener("devicedisconnected",BluetoothDiscovery.onBluetoothDisconnect);
-      console.log(s);
+      newDevice.addEventListener("deviceconnected", BluetoothDiscovery.onDeviceConnected);
+      newDevice.addEventListener("devicedisconnected", BluetoothDiscovery.onBluetoothDisconnect);
+      if (newDevice && BluetoothDiscovery.pairedDevices.indexOf(newDevice.deviceAddress) > -1) {
+        if(BluetoothDiscovery.devices.indexOf(newDevice.deviceAddress) < 0) {
+          BluetoothDiscovery.devices.push(newDevice.deviceAddress);
+        }
+        newDevice.addEventListener("deviceconnected", function (s) {
+          console.log("device:" + s.deviceAddress + "is connected successfully!")
+          //logic to send to server goes here
+        });
+
+        newDevice.addEventListener("devicedisconnected", function (s) {
+          console.log("device:" + s.deviceAddress + "is disconnected!")
+        });
+        newDevice.connect(function (success) {
+          console.log("Successfully Connected");
+          console.log(newDevice);
+          if(BluetoothDiscovery.devices.indexOf(newDevice.deviceAddress) < 0) {
+            BluetoothDiscovery.devices.push(newDevice.deviceAddress);
+          }
+        }, function (err) {
+          console.log("Error connecting");
+        });
+      }
 
     };
 
-    BluetoothDiscovery.onDeviceDisconnected = function(){
+    BluetoothDiscovery.onDeviceDisconnected = function () {
       BC.Proximity.clearPathLoss();
       navigator.notification.stopBeep();
     };
 
-    BluetoothDiscovery.manuallyAddNewDevice = function(address, callback) {
+    BluetoothDiscovery.manuallyAddNewDevice = function (address, callback) {
       var device = BC.bluetooth.devices[address];
-      if(device) {
+      if (device) {
         device.addEventListener("deviceconnected", function (s) {
           console.log("device:" + s.deviceAddress + "is connected successfully!")
           //logic to send to server goes here
@@ -106,11 +135,12 @@ angular.module('starter.services', [])
       }
     };
 
-    BluetoothDiscovery.startScan = function() {
+    BluetoothDiscovery.startScan = function () {
+      //LE or Classical
       BC.Bluetooth.StartScan();
     };
 
-    BluetoothDiscovery.stopScan = function() {
+    BluetoothDiscovery.stopScan = function () {
       BC.Bluetooth.StopScan();
     };
 
@@ -118,51 +148,42 @@ angular.module('starter.services', [])
     return BluetoothDiscovery;
 
   })
-  .factory('Chats', function () {
-    // Might use a resource here that returns a JSON array
+  .factory('ProximityProfile', function () {
+    var ProximityProfile = {};
+    ProximityProfile.proximity = new BC.ProximityProfile();
+    ProximityProfile.safety_value = -20;
+    ProximityProfile.unsafety_value = -40;
+    ProximityProfile.isFirstTime = true;
+    ProximityProfile.antiLostIsOpen = true;
+    ProximityProfile.safetyAlarmIsOpen = true;
+    ProximityProfile.isFirstConnect = true;
+    ProximityProfile.stateModel = 0;
+    ProximityProfile.reconnected = false;
+    ProximityProfile.setPictureModel = false;
+    ProximityProfile.isAlert = false;
 
-    // Some fake testing data
-    var chats = [{
-      id: 0,
-      name: 'Ben Sparrow',
-      lastText: 'You on your way?',
-      face: 'https://pbs.twimg.com/profile_images/514549811765211136/9SgAuHeY.png'
-    }, {
-      id: 1,
-      name: 'Max Lynx',
-      lastText: 'Hey, it\'s me',
-      face: 'https://avatars3.githubusercontent.com/u/11214?v=3&s=460'
-    }, {
-      id: 2,
-      name: 'Adam Bradleyson',
-      lastText: 'I should buy a boat',
-      face: 'https://pbs.twimg.com/profile_images/479090794058379264/84TKj_qa.jpeg'
-    }, {
-      id: 3,
-      name: 'Perry Governor',
-      lastText: 'Look at my mukluks!',
-      face: 'https://pbs.twimg.com/profile_images/598205061232103424/3j5HUXMY.png'
-    }, {
-      id: 4,
-      name: 'Mike Harrington',
-      lastText: 'This is wicked good ice cream.',
-      face: 'https://pbs.twimg.com/profile_images/578237281384841216/R3ae1n61.png'
-    }];
-
-    return {
-      all: function () {
-        return chats;
-      },
-      remove: function (chat) {
-        chats.splice(chats.indexOf(chat), 1);
-      },
-      get: function (chatId) {
-        for (var i = 0; i < chats.length; i++) {
-          if (chats[i].id === parseInt(chatId)) {
-            return chats[i];
-          }
-        }
-        return null;
-      }
+    ProximityProfile.farAwayFunc =  function() {
+      console.log("App is out of safety zone");
+      //geolocation?
     };
+
+    ProximityProfile.safetyZone_func = function() {
+      console.log("App is out of safety zone");
+    };
+
+
+    ProximityProfile.closeToFunc =  function() {
+      console.log("App is out of safety zone");
+    };
+
+
+    //app.safety_value = parseInt(this.value) > -20 ? -1 : parseInt(this.value) + 20;
+    //app.unsafety_value = parseInt(this.value);
+    ProximityProfile.initProximity = function (device) {
+      ProximityProfile.proximity.clearPathLoss();
+      ProximityProfile.proximity.onPathLoss(device, ProximityProfile.safety_value, ProximityProfile.unsafety_value, ProximityProfile.farAwayFunc, ProximityProfile.safetyZone_func, ProximityProfile.closeToFunc);
+    };
+
+    return ProximityProfile;
+
   });
