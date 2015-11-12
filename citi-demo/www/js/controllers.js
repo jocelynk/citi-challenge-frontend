@@ -1,18 +1,19 @@
-angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordovaBeacon', 'ngWebSocket'])
+angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordovaBeacon'])
 
-  .controller('DashCtrl', function ($rootScope, $scope, $timeout, $ionicPlatform, $cordovaDevice, $cordovaBeacon, BluetoothDiscovery, $ionicPopup, $websocket) {
+  .controller('DashCtrl', function ($rootScope, $scope, $timeout, $ionicPlatform, $cordovaDevice, $cordovaBeacon, BluetoothDiscovery, $ionicPopup) {
     //need to add location
     //need to change bluetooth proximity 1 - Imm, 2 - Near, 3 - Far, -1 - Unknown
     $scope.info = {
-      deviceUUID: null,
+      event: "",
+      deviceId: null,
       wifiSSID: null,
       ipAddress: null,
-      bluetoothDevices: [],
+      bluetoothAddress: [],
       beacons: {}
     };
 
     $scope.scan = function () {
-      $scope.info.bluetoothDevices = BluetoothDiscovery.devices;
+      $scope.info.bluetoothAddress = BluetoothDiscovery.devices;
       console.log($scope.info);
     };
 
@@ -23,14 +24,13 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       });
       var obj = {
         event: 'CONFIRMED',
-        deviceId: $scope.info.deviceUUID,
+        deviceId: $scope.info.deviceId,
         status: 'CONFIRMED'
       };
-      server.send(JSON.stringify(obj));
-      console.log(event);
+
       confirmPopup.then(function(res) {
         if(res) {
-          server.send(obj);
+          $scope.server.send(JSON.stringify(obj));
         } else {
         }
       });
@@ -41,7 +41,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       BluetoothDiscovery.bindCordovaEvents();
 
       if (window.cordova) {
-        $scope.info.deviceUUID = $cordovaDevice.getUUID();
+        $scope.info.deviceId = $cordovaDevice.getUUID();
         $cordovaBeacon.requestWhenInUseAuthorization();
         $rootScope.$on("$cordovaBeacon:didRangeBeaconsInRegion", function (event, pluginResult) {
           var uniqueBeaconKey;
@@ -80,56 +80,19 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       }
       //b9407f30-f5f8-466e-aff9-25556b57fe6d
 
+      $scope.server = new WebSocket("ws://10.128.14.51:9000/ws");
 
-      //$scope.server = $websocket("ws://10.128.14.51:9000/ws");
-      var server = new WebSocket("ws://10.128.14.51:9000/ws");
-     /* $scope.server.onOpen(function(e){
+      $scope.server.onopen = function (event) {
         var obj = {
           event: 'OPEN',
-          deviceId: $scope.info.deviceUUID,
+          deviceId: $scope.info.deviceId,
           status: 'INIT'
         };
         $scope.server.send(JSON.stringify(obj));
-        console.log(e);
-      });
-
-      $scope.server.onMessage(function(e) {
-        var event = null;
-
-        try{
-          event=JSON.parse(e.data);
-        }catch(e){
-        }
-
-        if(event !== null) {
-          switch (event.event) {
-            case 'LOGIN_INIT':
-              $scope.server.send(JSON.stringify($scope.info));
-              break;
-            case 'DO_ACTION':
-              //method to get phone action
-              break;
-            default:
-              break;
-          }
-        }
-      });
-
-      $scope.server.onClose(function(e){
-        console.log("closing connection");
-      });
-*/
-      server.onopen = function (event) {
-        var obj = {
-          event: 'OPEN',
-          deviceId: $scope.info.deviceUUID,
-          status: 'INIT'
-        };
-        server.send(JSON.stringify(obj));
         console.log(event);
       };
 
-      server.onmessage = function (e) {
+      $scope.server.onmessage = function (e) {
         var event = null;
 
         try{
@@ -140,10 +103,41 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
         if(event !== null) {
           switch (event.event) {
             case 'LOGIN_INIT':
-              server.send(JSON.stringify($scope.info));
+              var master = {
+                event: "LOGIN_DEVICES",
+                deviceId: $scope.info.deviceId,
+                deviceType: "SMART_PHONE",
+                wifiSSID: $scope.info.wifiSSID,
+                ipAddress: $scope.info.ipAddress
+              };
+              $scope.server.send(JSON.stringify(master));
+
+
+              angular.forEach($scope.info.beacons, function(value, key) {
+                var beacon = {
+                  event: "LOGIN_DEVICES",
+                  deviceId: value['uuid'],
+                  deviceType: "BEACON",
+                  proximity: value['proximity']
+                };
+                $scope.server.send(JSON.stringify(beacon));
+              });
+
+              for(var i = 0; i < BluetoothDiscovery.devices.length; i++) {
+                var bluetoothDevices = {
+                  event: "LOGIN_DEVICES",
+                  deviceName: BluetoothDiscovery.devices[i]["deviceName"],
+                  bluetoothAddress: BluetoothDiscovery.devices[i]["deviceAddress"],
+                  deviceType: "BEACON"
+                };
+
+                $scope.server.send(JSON.stringify(bluetoothDevices));
+              }
+
+
               break;
             case 'DO_ACTION':
-              //method to get phone action
+              $scope.showConfirm();
               break;
             default:
               break;
@@ -151,7 +145,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
         }
       };
 
-      server.onclose = function (event) {
+      $scope.server.onclose = function (event) {
         console.log("websocket closing");
         console.log(event)
       };
@@ -285,7 +279,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
   .controller('ChatDetailCtrl', function ($scope, $stateParams) {
   })
 
-  .controller('AccountCtrl', function ($rootScope, $scope, $ionicPlatform, $cordovaDevice, $cordovaBarcodeScanner, $cordovaBeacon, DeviceRegistration, BluetoothDiscovery, DeviceInformation) {
+  .controller('AccountCtrl', function ($rootScope, $scope, $ionicPlatform, $cordovaDevice, $cordovaBarcodeScanner, $cordovaBeacon, DeviceRegistration, BluetoothDiscovery) {
     $scope.beacons = {};
 
     //b9407f30-f5f8-466e-aff9-25556b57fe6d

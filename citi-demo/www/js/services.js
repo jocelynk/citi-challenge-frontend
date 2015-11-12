@@ -118,8 +118,9 @@ angular.module('starter.services', [])
         newDevice.connect(function (success) {
           console.log("Successfully Connected");
           console.log(newDevice);
-          if(BluetoothDiscovery.devices.indexOf(newDevice.deviceAddress) < 0) {
-            BluetoothDiscovery.devices.push(newDevice.deviceAddress);
+          if(findElement(BluetoothDiscovery.devices, 'deviceAddress', newDevice.deviceAddress) == null) {
+            var device = {deviceName: newDevice.deviceName || null, deviceAddress: newDevice.deviceAddress || null};
+            BluetoothDiscovery.devices.push(device);
           }
         }, function (err) {
           console.log("Error connecting");
