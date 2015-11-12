@@ -22,15 +22,22 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
         title: 'Please Confirm',
         template: 'Please confirm authentication for account ?'
       });
-      var obj = {
-        event: 'CONFIRMED',
-        deviceId: $scope.info.deviceId,
-        status: 'CONFIRMED'
-      };
+
 
       confirmPopup.then(function(res) {
         if(res) {
-          $scope.server.send(JSON.stringify(obj));
+          $scope.server.close();
+
+          var server = new WebSocket("ws://10.128.14.51:9000/ws");
+          server.onopen = function (event) {
+            var obj = {
+              event: 'CONFIRMED',
+              deviceId: $scope.info.deviceId
+            };
+
+            server.send(JSON.stringify(obj));
+            //server.close();
+          };
         } else {
         }
       });
