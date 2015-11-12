@@ -1,18 +1,30 @@
 <ion-view view-title="Dashboard">
-  <ion-content class="padding">
-    <div class="container">
-      <div class="row">
-        <div class="col-md-12"><button class="button btn" ng-click="scan()">Scan</button></div>
+  <ion-content>
+    <img src="./img/citi_bluewave_sd.png"/>
+    <div>
+      <h3 id="scan">Scanning for Devices</h3>
+      <div class="holder">
+        <div id='pulse1'></div>
+        <div id='pulse2'></div>
       </div>
+
     </div>
-    <div class="list card" ng-model="account" ng-if="showAccount">
-      <div class="item item-divider">User Account Initiating Connection</div>
-      <div class="item item-body">
-        <div>
-          {{account.userId}}
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12">
+            <button class="button btn" ng-click="scan()">Scan</button>
+          </div>
         </div>
       </div>
-    </div>
+      <div class="list card" ng-model="account" ng-if="showAccount">
+        <div class="item item-divider">User Account Initiating Connection</div>
+        <div class="item item-body">
+          <div>
+            {{account.userId}}
+          </div>
+        </div>
+      </div>
+
 
   </ion-content>
 </ion-view>
