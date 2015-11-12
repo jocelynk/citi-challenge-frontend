@@ -26,8 +26,15 @@ $base-background-color: #365B98 !default;
 
 img {
   position:relative;
-  max-width: 100%;
   z-index:2;
+}
+
+.vertical-center {
+  min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+  min-height: 100vh; /* These two lines are counted as one :-)       */
+
+  display: flex;
+  align-items: center;
 }
 
 #scan {

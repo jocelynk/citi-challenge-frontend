@@ -156,7 +156,13 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
         console.log("websocket closing");
         console.log(event)
       };
+
+
     });
+
+    $scope.$watch('BluetoothDiscovery.', function(newVal, oldVal){
+      console.log('changed');
+    }, true);
 
   })
   .controller('AccountCtrl', function ($rootScope, $scope, $ionicPlatform, $cordovaDevice, $cordovaBarcodeScanner, $cordovaBeacon, DeviceRegistration, BluetoothDiscovery) {
@@ -254,7 +260,9 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
           uniqueBeaconKey = pluginResult.beacons[i].uuid + ":" + pluginResult.beacons[i].major + ":" + pluginResult.beacons[i].minor;
           $scope.beacons[uniqueBeaconKey] = pluginResult.beacons[i];
         }
-        $scope.$apply();
+        if (!$scope.$$phase) {
+          $scope.$apply();
+        }
       });
     };
   });
