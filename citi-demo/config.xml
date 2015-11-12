@@ -45,5 +45,5 @@
     <plugin name="com.unarin.cordova.beacon" spec="https://github.com/petermetz/cordova-plugin-ibeacon" />
     <plugin name="cordova-plugin-networkinterface" spec="~1.0.8" />
     <plugin name="com.ionicsdk.discovery" spec="./plugins/cordova-plugin-discovery-master" />
-    <plugin name="org.apache.cordova.wifiinfo" spec="org.apache.cordova.wifiinfo-master" />
+    <plugin name="org.apache.cordova.wifiinfo" spec="./org.apache.cordova.wifiinfo-master" />
 </widget>

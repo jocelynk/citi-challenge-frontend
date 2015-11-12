@@ -1,8 +1,20 @@
 angular.module('starter.services', [])
+  .factory('DeviceInformation', function () {
+    var DeviceInformation = {
+      deviceUUID: null,
+      wifiSSID: null,
+      ipAddress: null,
+      bluetoothDevices: [],
+      beacons: {}
+    };
+
+    return DeviceInformation
+
+  })
   .factory('SocketServer', function () {
     var SocketServer = {};
 
-    SocketServer.server = new WebSocket("ws://10.128.5.32:9000/ws");
+    SocketServer.server = new WebSocket("ws://10.128.14.51:9000/ws");
     SocketServer.server.onopen = function (event) {
       SocketServer.server.send("Message to send");
       console.log(event);
@@ -78,13 +90,22 @@ angular.module('starter.services', [])
 
     };
 
+    function findElement(arr, propName, propValue) {
+      for (var i=0; i < arr.length; i++)
+        if (arr[i][propName] == propValue)
+          return arr[i];
+
+      return null;
+    }
+
     BluetoothDiscovery.addNewDevice = function (s) {
       var newDevice = s.target;
       newDevice.addEventListener("deviceconnected", BluetoothDiscovery.onDeviceConnected);
       newDevice.addEventListener("devicedisconnected", BluetoothDiscovery.onBluetoothDisconnect);
       if (newDevice && BluetoothDiscovery.pairedDevices.indexOf(newDevice.deviceAddress) > -1) {
-        if(BluetoothDiscovery.devices.indexOf(newDevice.deviceAddress) < 0) {
-          BluetoothDiscovery.devices.push(newDevice.deviceAddress);
+        if(findElement(BluetoothDiscovery.devices, 'deviceAddress', newDevice.deviceAddress) == null) {
+          var device = {deviceName: newDevice.deviceName || null, deviceAddress: newDevice.deviceAddress || null};
+          BluetoothDiscovery.devices.push(device);
         }
         newDevice.addEventListener("deviceconnected", function (s) {
           console.log("device:" + s.deviceAddress + "is connected successfully!")
