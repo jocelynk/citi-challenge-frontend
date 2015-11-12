@@ -120,6 +120,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
               $scope.server.send(JSON.stringify(master));
 
 
+              //add timeouts for the messages
               angular.forEach($scope.info.beacons, function(value, key) {
                 var beacon = {
                   event: "LOGIN_DEVICES",
@@ -141,9 +142,8 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
                 $scope.server.send(JSON.stringify(bluetoothDevices));
               }
 
-
               break;
-            case 'DO_ACTION':
+            case 'LOCGIN_ACTION_REQUIRED':
               $scope.showConfirm();
               break;
             default:
@@ -159,155 +159,24 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
     });
 
   })
-
-  .controller('ChatsCtrl', function ($scope, $ionicPlatform, ProximityProfile) {
-    // With the new view caching in Ionic, Controllers are only called
-    // when they are recreated or on app start, instead of every page change.
-    // To listen for when this page is active (for example, to refresh data),
-    // listen for the $ionicView.enter event:
-    //
-    //$scope.$on('$ionicView.enter', function(e) {
-    //});
-
-    Discovery.identify(function (serviceData) {
-      console.log(serviceData);
-    }, function (error) {
-    });
-
-    Discovery.discover(function (serviceData) {
-      console.log(serviceData);
-    }, function (error) {
-    });
-
-    $scope.bindCordovaEvents = function () {
-      document.addEventListener('bcready', $scope.onBCReady, false);
-    };
-
-    $scope.onNewIBeacon = function (s) {
-      var newibeacon = s.target;
-      console.log(newibeacon);
-    };
-
-    $scope.onBCReady = function () {
-      BC.bluetooth.addEventListener("bluetoothstatechange", $scope.onBluetoothStateChange);
-      BC.bluetooth.addEventListener("newdevice", $scope.addNewDevice);
-      BC.iBeaconManager.addEventListener("newibeacon", $scope.onNewIBeacon);
-      if (!BC.bluetooth.isopen) {
-        if (API !== "ios") {
-          BC.Bluetooth.OpenBluetooth(function () {
-          });
-        } else {
-          //alert("Please open your bluetooth first.");
-        }
-      }
-    };
-
-    $scope.onBluetoothStateChange = function () {
-      if (BC.bluetooth.isopen) {
-
-      } else {
-        if (API !== "ios") {
-          BC.Bluetooth.OpenBluetooth(function () {
-          });
-        } else {
-          //alert("Please open your bluetooth first.");
-        }
-      }
-    };
-
-    $scope.onBluetoothDisconnect = function (arg) {
-      BC.Proximity.clearPathLoss();
-      navigator.notification.stopBeep();
-
-    };
-
-    $scope.onDeviceConnected = function (arg) {
-      var deviceAddress = arg.deviceAddress;
-
-    };
-
-    $scope.addNewDevice = function (s) {
-      var newDevice = s.target;
-      newDevice.addEventListener("deviceconnected", $scope.onDeviceConnected);
-      newDevice.addEventListener("devicedisconnected", $scope.onBluetoothDisconnect);
-      console.log(s);
-
-    };
-
-    $scope.onDeviceDisconnected = function () {
-      BC.Proximity.clearPathLoss();
-      navigator.notification.stopBeep();
-    };
-
-    $scope.manuallyAddNewDevice = function (address) {
-      var device = BC.bluetooth.devices[address];
-      if (device) {
-        ProximityProfile.initProximity(device);
-        device.addEventListener("deviceconnected", function (s) {
-          console.log("device:" + s.deviceAddress + "is connected successfully!")
-        });
-        device.addEventListener("devicedisconnected", function (s) {
-          console.log("device:" + s.deviceAddress + "is connected successfully!")
-        });
-        /*device.connect(function () {
-
-         ProximityProfile.initProximity(device);
-         console.log("device is already connected well!");
-         }, function(err) {
-         console.log(err);
-         }, "7A9C3B55-78D0-44A7-A94E-A93E3FE118CE", false);*/
-        //device.connect(function(){alert("device is already connected well!");},null,"7A9C3B55-78D0-44A7-A94E-A93E3FE118CE",ture); //connect if the device is classical
-
-      }
-    };
-
-    /*SerialPort short UUID = 0x1101
-     Long UUID = 00001101-0000-1000-8000-00805F9B34FB*/
-    $ionicPlatform.ready(function () {
-
-      $scope.bindCordovaEvents();
-      BC.Bluetooth.StopScan();
-      BC.Bluetooth.StartScan();
-
-      BC.Bluetooth.GetPairedDevices(function (mes) {
-        for (var i = 0; i < mes.length; i++) {
-          $scope.manuallyAddNewDevice(mes[i].deviceAddress);
-        }
-
-      });
-      //http://www.bluecove.org/bluecove/apidocs/javax/bluetooth/UUID.html
-
-
-    });
-
-
-  })
-
-  .controller('ChatDetailCtrl', function ($scope, $stateParams) {
-  })
-
   .controller('AccountCtrl', function ($rootScope, $scope, $ionicPlatform, $cordovaDevice, $cordovaBarcodeScanner, $cordovaBeacon, DeviceRegistration, BluetoothDiscovery) {
     $scope.beacons = {};
 
     //b9407f30-f5f8-466e-aff9-25556b57fe6d
     $ionicPlatform.ready(function () {
+      if(window.cordova) {
+        $cordovaBeacon.requestWhenInUseAuthorization();
 
-      $cordovaBeacon.requestWhenInUseAuthorization();
-
-      $rootScope.$on("$cordovaBeacon:didRangeBeaconsInRegion", function (event, pluginResult) {
-        var uniqueBeaconKey;
-        for (var i = 0; i < pluginResult.beacons.length; i++) {
-          uniqueBeaconKey = pluginResult.beacons[i].uuid + ":" + pluginResult.beacons[i].major + ":" + pluginResult.beacons[i].minor;
-          $scope.beacons[uniqueBeaconKey] = pluginResult.beacons[i];
-        }
-        $scope.$apply();
-      });
-
-      $cordovaBeacon.startRangingBeaconsInRegion($cordovaBeacon.createBeaconRegion("tile", "373BF144-B760-8CC2-9C43-95685B4061A6"));
-      $cordovaBeacon.startRangingBeaconsInRegion($cordovaBeacon.createBeaconRegion("tile", "C008F6A9-7CC8-A9B8-995F-D93069032173"));
-      $cordovaBeacon.startRangingBeaconsInRegion($cordovaBeacon.createBeaconRegion("estimote", "b9407f30-f5f8-466e-aff9-25556b57fe6d"));
-
-
+        $rootScope.$on("$cordovaBeacon:didRangeBeaconsInRegion", function (event, pluginResult) {
+          var uniqueBeaconKey;
+          for (var i = 0; i < pluginResult.beacons.length; i++) {
+            uniqueBeaconKey = pluginResult.beacons[i].uuid + ":" + pluginResult.beacons[i].major + ":" + pluginResult.beacons[i].minor;
+            $scope.beacons[uniqueBeaconKey] = pluginResult.beacons[i];
+          }
+          $scope.$apply();
+        });
+        $cordovaBeacon.startRangingBeaconsInRegion($cordovaBeacon.createBeaconRegion("estimote", "b9407f30-f5f8-466e-aff9-25556b57fe6d"));
+      }
     });
 
 
@@ -350,8 +219,6 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
             $scope.userName = jsonBarCode.userName || 'Team Citi';
             $scope.devices = deviceInfo.devices;
             $scope.showDeviceList = true;
-            console.log($scope.devices);
-            $scope.$apply();
             DeviceRegistration.saveDeviceInfo(deviceInfo).then(function (success) {
               console.log(success);
               return success;
