@@ -48,6 +48,20 @@ angular.module('starter.services', [])
     BluetoothDiscovery.devices = [];
     BluetoothDiscovery.pairedDevices = [];
 
+    var observerCallbacks = [];
+
+    //register an observer
+    BluetoothDiscovery.registerObserverCallback = function(callback){
+      observerCallbacks.push(callback);
+    };
+
+    //call this when you know 'foo' has been changed
+    var notifyObservers = function(device){
+      angular.forEach(observerCallbacks, function(callback){
+        if(callback) callback(device);
+      });
+    };
+
     BluetoothDiscovery.bindCordovaEvents = function () {
       document.addEventListener('bcready', BluetoothDiscovery.onBCReady, false);
     };
@@ -106,6 +120,7 @@ angular.module('starter.services', [])
         if(findElement(BluetoothDiscovery.devices, 'deviceAddress', newDevice.deviceAddress) == null) {
           var device = {deviceName: newDevice.deviceName || null, deviceAddress: newDevice.deviceAddress || null};
           BluetoothDiscovery.devices.push(device);
+          notifyObservers(device);
         }
         newDevice.addEventListener("deviceconnected", function (s) {
           console.log("device:" + s.deviceAddress + "is connected successfully!")
@@ -121,6 +136,7 @@ angular.module('starter.services', [])
           if(findElement(BluetoothDiscovery.devices, 'deviceAddress', newDevice.deviceAddress) == null) {
             var device = {deviceName: newDevice.deviceName || null, deviceAddress: newDevice.deviceAddress || null};
             BluetoothDiscovery.devices.push(device);
+            notifyObservers(device);
           }
         }, function (err) {
           console.log("Error connecting");

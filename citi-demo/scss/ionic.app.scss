@@ -24,6 +24,11 @@ $base-background-color: #365B98 !default;
 // Include all of Ionic
 @import "www/lib/ionic/scss/ionic";
 
+.round {
+  .border-radius( 5px );
+}
+
+
 img {
   position:relative;
   z-index:2;
@@ -37,15 +42,75 @@ img {
   align-items: center;
 }
 
+.row {text-align: center}
+
+.margin-top-xl {
+  margin-top: 50px;
+}
+
+
 #scan {
   position:absolute;
-  top:200%; left:50%;
+  top:290%; left:50%;
   z-index:1;
   -webkit-transform:translateX(-50%) translateY(-50%);
   transform:translateX(-50%) translateY(-50%);
 }
 
 #pulse1, #pulse2 {
+  border-radius:50%;
+  position:absolute;
+  z-index:0;
+  height: 75px; width: 75px;
+  top: 300%; left:50%;
+  border: 2px solid rgba(66, 152, 181, 1);
+  -webkit-animation: pulsate 3s infinite;
+  animation: pulsate 3s infinite;
+  background-color:#4298b5;
+  -webkit-transform:translateX(-50%) translateY(-50%);
+  transform:translateX(-50%) translateY(-50%);
+}
+#pulse2 {
+  -webkit-animation: pulsate 3s -.5s infinite;
+  animation: pulsate 3s -.5s infinite;
+}
+@-webkit-keyframes pulsate {
+  0%,100% {
+    width:100px;
+    height:100px;
+    opacity:0;
+  }
+  1% { opacity:1; }
+  70% {
+    opacity:0.5;
+  }
+  99.999% {
+    width:100px;
+    height:100px;
+    opacity:0;
+  }
+}
+@keyframes pulsate {
+  0%,100% {
+    width:150px;
+    height:150px;
+    opacity:0;
+  }
+  1% { opacity:1; }
+  70% {
+    opacity:0.5;
+  }
+  99.999% {
+    width:300px;
+    height:300px;
+    opacity:0;
+  }
+}
+
+
+
+
+/*#pulse1, #pulse2 {
   border-radius:50%;
   position:absolute;
   z-index:0;
@@ -93,6 +158,6 @@ img {
     height:950px;
     opacity:0;
   }
-}
+}*/
 
 

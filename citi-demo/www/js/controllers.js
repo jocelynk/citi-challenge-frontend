@@ -11,33 +11,47 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       bluetoothAddress: [],
       beacons: {}
     };
+    $scope.showScanning = true;
+
+    $scope.loginInit = false;
 
     $scope.scan = function () {
       $scope.info.bluetoothAddress = BluetoothDiscovery.devices;
       console.log($scope.info);
     };
 
-    $scope.showConfirm = function() {
+    $scope.showConfirm = function () {
       var confirmPopup = $ionicPopup.confirm({
         title: 'Please Confirm',
         template: 'Please confirm authentication for account ?'
       });
 
 
-      confirmPopup.then(function(res) {
-        if(res) {
-          $scope.server.close();
+      confirmPopup.then(function (res) {
+        if (res) {
+          //$scope.server.close();
 
-          var server = new WebSocket("ws://10.128.14.51:9000/ws");
-          server.onopen = function (event) {
-            var obj = {
-              event: 'CONFIRMED',
-              deviceId: $scope.info.deviceId
-            };
+          // server = new WebSocket("ws://10.128.0.151:9000/ws");
+          /*$scope.server.onopen = function (event) {
+           var obj = {
+           event: 'CONFIRMED',
+           deviceId: $scope.info.deviceId
+           };
 
-            server.send(JSON.stringify(obj));
-            //server.close();
+           $scope.server.send(JSON.stringify(obj));
+           $scope.loginInit = false;
+           //server.close();
+           };*/
+
+          var obj = {
+            masterId: $scope.info.deviceId,
+            event: 'LOGIN_ACTION_CONFIRMED',
+            deviceId: $scope.info.deviceId
           };
+
+          $scope.server.send(JSON.stringify(obj));
+          $scope.loginInit = false;
+          $scope.showScanning = false;
         } else {
         }
       });
@@ -87,12 +101,12 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       }
       //b9407f30-f5f8-466e-aff9-25556b57fe6d
 
-      $scope.server = new WebSocket("ws://10.128.14.51:9000/ws");
+      $scope.server = new WebSocket("ws://10.128.0.151:9000/ws");
 
       $scope.server.onopen = function (event) {
         var obj = {
           event: 'OPEN',
-          deviceId: $scope.info.deviceId,
+          masterId: $scope.info.deviceId,
           status: 'INIT'
         };
         $scope.server.send(JSON.stringify(obj));
@@ -102,15 +116,17 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       $scope.server.onmessage = function (e) {
         var event = null;
 
-        try{
-          event=JSON.parse(e.data);
-        }catch(e){
+        try {
+          event = JSON.parse(e.data);
+        } catch (e) {
         }
 
-        if(event !== null) {
+        if (event !== null) {
           switch (event.event) {
             case 'LOGIN_INIT':
+              $scope.loginInit = true;
               var master = {
+                masterId: $scope.info.deviceId,
                 event: "LOGIN_DEVICES",
                 deviceId: $scope.info.deviceId,
                 deviceType: "SMART_PHONE",
@@ -121,8 +137,9 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
 
 
               //add timeouts for the messages
-              angular.forEach($scope.info.beacons, function(value, key) {
+              angular.forEach($scope.info.beacons, function (value, key) {
                 var beacon = {
+                  masterId: $scope.info.deviceId,
                   event: "LOGIN_DEVICES",
                   deviceId: value['uuid'],
                   deviceType: "BEACON",
@@ -131,8 +148,9 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
                 $scope.server.send(JSON.stringify(beacon));
               });
 
-              for(var i = 0; i < BluetoothDiscovery.devices.length; i++) {
+              for (var i = 0; i < BluetoothDiscovery.devices.length; i++) {
                 var bluetoothDevices = {
+                  masterId: $scope.info.deviceId,
                   event: "LOGIN_DEVICES",
                   deviceName: BluetoothDiscovery.devices[i]["deviceName"],
                   bluetoothAddress: BluetoothDiscovery.devices[i]["deviceAddress"],
@@ -141,10 +159,11 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
 
                 $scope.server.send(JSON.stringify(bluetoothDevices));
               }
-
               break;
-            case 'LOCGIN_ACTION_REQUIRED':
-              $scope.showConfirm();
+            case 'LOGIN_ACTION_REQUIRED':
+              if ($scope.loginInit) {
+                $scope.showConfirm();
+              }
               break;
             default:
               break;
@@ -160,9 +179,22 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
 
     });
 
-    $scope.$watch('BluetoothDiscovery.', function(newVal, oldVal){
-      console.log('changed');
-    }, true);
+    $scope.sendMessage = function (device) {
+      if ($scope.loginInit) {
+        var bluetoothDevice = {
+          masterId: $scope.info.deviceId,
+          event: "LOGIN_DEVICES",
+          deviceName: device["deviceName"],
+          bluetoothAddress: device["deviceAddress"],
+          deviceType: "BEACON"
+        };
+
+        $scope.server.send(JSON.stringify(bluetoothDevice));
+      }
+    };
+
+    BluetoothDiscovery.registerObserverCallback($scope.sendMessage);
+
 
   })
   .controller('AccountCtrl', function ($rootScope, $scope, $ionicPlatform, $cordovaDevice, $cordovaBarcodeScanner, $cordovaBeacon, DeviceRegistration, BluetoothDiscovery) {
@@ -170,7 +202,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
 
     //b9407f30-f5f8-466e-aff9-25556b57fe6d
     $ionicPlatform.ready(function () {
-      if(window.cordova) {
+      if (window.cordova) {
         $cordovaBeacon.requestWhenInUseAuthorization();
 
         $rootScope.$on("$cordovaBeacon:didRangeBeaconsInRegion", function (event, pluginResult) {
@@ -179,7 +211,9 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
             uniqueBeaconKey = pluginResult.beacons[i].uuid + ":" + pluginResult.beacons[i].major + ":" + pluginResult.beacons[i].minor;
             $scope.beacons[uniqueBeaconKey] = pluginResult.beacons[i];
           }
-          $scope.$apply();
+          if (!$scope.$$phase) {
+            $scope.$apply();
+          }
         });
         $cordovaBeacon.startRangingBeaconsInRegion($cordovaBeacon.createBeaconRegion("estimote", "b9407f30-f5f8-466e-aff9-25556b57fe6d"));
       }
@@ -233,16 +267,16 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
               return null;
             });
 
-          /*  BC.Bluetooth.GetPairedDevices(function (mes) {
-              for (var i = 0; i < mes.length; i++) {
-                var d = {};
-                d.deviceId = mes[i].deviceAddress;
-                d.name = mes[i].deviceName || 'beacon';
-                deviceInfo.devices.push(d);
-                //BluetoothDiscovery.manuallyAddNewDevice(mes[i].deviceAddress);
-              }
+            /*  BC.Bluetooth.GetPairedDevices(function (mes) {
+             for (var i = 0; i < mes.length; i++) {
+             var d = {};
+             d.deviceId = mes[i].deviceAddress;
+             d.name = mes[i].deviceName || 'beacon';
+             deviceInfo.devices.push(d);
+             //BluetoothDiscovery.manuallyAddNewDevice(mes[i].deviceAddress);
+             }
 
-            });*/
+             });*/
           }, function (error) {
             // An error occurred
           });
