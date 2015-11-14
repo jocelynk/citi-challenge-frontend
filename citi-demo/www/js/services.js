@@ -14,7 +14,7 @@ angular.module('starter.services', [])
   .factory('SocketServer', function () {
     var SocketServer = {};
 
-    SocketServer.server = new WebSocket("ws://10.128.14.51:9000/ws");
+    SocketServer.server = new WebSocket("ws://10.128.7.83:9000/ws");
     SocketServer.server.onopen = function (event) {
       SocketServer.server.send("Message to send");
       console.log(event);
@@ -36,7 +36,7 @@ angular.module('starter.services', [])
   .factory('DeviceRegistration', function ($http) {
     var DeviceRegistration = {};
     DeviceRegistration.saveDeviceInfo = function (deviceInfo) {
-      return $http.post('http://10.128.5.32:9000/api/device', deviceInfo);
+      return $http.post('http://10.128.7.83:9000/api/device', deviceInfo);
 
     };
 

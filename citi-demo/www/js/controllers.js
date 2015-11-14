@@ -12,7 +12,8 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       beacons: {}
     };
     $scope.showScanning = true;
-
+    $scope.showDeviceList = false;
+    $scope.devices = [];
     $scope.loginInit = false;
 
     $scope.scan = function () {
@@ -31,7 +32,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
         if (res) {
           //$scope.server.close();
 
-          // server = new WebSocket("ws://10.128.0.151:9000/ws");
+          // server = new WebSocket("ws://10.128.7.83:9000/ws"");
           /*$scope.server.onopen = function (event) {
            var obj = {
            event: 'CONFIRMED',
@@ -49,6 +50,10 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
             deviceId: $scope.info.deviceId
           };
 
+          $scope.devices = BluetoothDiscovery.devices;
+
+
+          $scope.showDeviceList = true;
           $scope.server.send(JSON.stringify(obj));
           $scope.loginInit = false;
           $scope.showScanning = false;
@@ -65,30 +70,54 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
         $scope.info.deviceId = $cordovaDevice.getUUID();
         $cordovaBeacon.requestWhenInUseAuthorization();
         $rootScope.$on("$cordovaBeacon:didRangeBeaconsInRegion", function (event, pluginResult) {
-          var uniqueBeaconKey;
-          for (var i = 0; i < pluginResult.beacons.length; i++) {
-            uniqueBeaconKey = pluginResult.beacons[i].uuid + ":" + pluginResult.beacons[i].major + ":" + pluginResult.beacons[i].minor;
-            $scope.info.beacons[uniqueBeaconKey] = pluginResult.beacons[i];
-            switch ($scope.info.beacons[uniqueBeaconKey]['proximity']) {
-              case 'ProximityImmediate':
-                $scope.info.beacons[uniqueBeaconKey]['proximity'] = 1;
-                break;
-              case 'ProximityNear':
-                $scope.info.beacons[uniqueBeaconKey]['proximity'] = 2;
-                break;
-              case 'ProximityFar':
-                $scope.info.beacons[uniqueBeaconKey]['proximity'] = 3;
-                break;
-              default:
-                $scope.info.beacons[uniqueBeaconKey]['proximity'] = -1;
-                break;
-            }
+            var uniqueBeaconKey;
+            for (var i = 0; i < pluginResult.beacons.length; i++) {
+              uniqueBeaconKey = pluginResult.beacons[i].uuid + ":" + pluginResult.beacons[i].major + ":" + pluginResult.beacons[i].minor;
+              var originalProximity = '';
+              if(angular.isDefined($scope.info.beacons[uniqueBeaconKey]) && $scope.info.beacons[uniqueBeaconKey] !== null) {
+                originalProximity = $scope.info.beacons[uniqueBeaconKey]['proximity'];
+              }
 
+              $scope.info.beacons[uniqueBeaconKey] = pluginResult.beacons[i];
+
+              switch ($scope.info.beacons[uniqueBeaconKey]['proximity']) {
+                case 'ProximityImmediate':
+                  $scope.info.beacons[uniqueBeaconKey]['proximity'] = 1;
+                  break;
+                case 'ProximityNear':
+                  $scope.info.beacons[uniqueBeaconKey]['proximity'] = 2;
+                  break;
+                case 'ProximityFar':
+                  $scope.info.beacons[uniqueBeaconKey]['proximity'] = 3;
+                  break;
+                default:
+                  $scope.info.beacons[uniqueBeaconKey]['proximity'] = -1;
+                  break;
+              }
+
+             /* if ($scope.loginInit) {
+                if (originalProximity !== $scope.info.beacons[uniqueBeaconKey]['proximity']) {
+                  var beaconDevice = {
+                    masterId: $scope.info.deviceId,
+                    event: "LOGIN_DEVICES",
+                    deviceName: 'ESTIMOTE',
+                    deviceId: pluginResult.beacons[i].uuid,
+                    deviceType: "BEACON",
+                    proximity: $scope.info.beacons[uniqueBeaconKey]['proximity']
+                  }
+
+                  $scope.server.send(JSON.stringify(beaconDevice));
+                }
+
+              }*/
+
+            }
+            if (!$scope.$$phase) {
+              $scope.$apply();
+            }
           }
-          if (!$scope.$$phase) {
-            $scope.$apply();
-          }
-        });
+        )
+        ;
 
         $cordovaBeacon.startRangingBeaconsInRegion($cordovaBeacon.createBeaconRegion("estimote", "b9407f30-f5f8-466e-aff9-25556b57fe6d"));
 
@@ -101,7 +130,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       }
       //b9407f30-f5f8-466e-aff9-25556b57fe6d
 
-      $scope.server = new WebSocket("ws://10.128.0.151:9000/ws");
+      $scope.server = new WebSocket("ws://10.128.7.83:9000/ws");
 
       $scope.server.onopen = function (event) {
         var obj = {
@@ -124,6 +153,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
         if (event !== null) {
           switch (event.event) {
             case 'LOGIN_INIT':
+              $scope.showDeviceList = false;
               $scope.loginInit = true;
               var master = {
                 masterId: $scope.info.deviceId,
@@ -197,7 +227,8 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
 
 
   })
-  .controller('AccountCtrl', function ($rootScope, $scope, $ionicPlatform, $cordovaDevice, $cordovaBarcodeScanner, $cordovaBeacon, DeviceRegistration, BluetoothDiscovery) {
+  .
+  controller('AccountCtrl', function ($rootScope, $scope, $ionicPlatform, $cordovaDevice, $cordovaBarcodeScanner, $cordovaBeacon, DeviceRegistration, BluetoothDiscovery) {
     $scope.beacons = {};
 
     //b9407f30-f5f8-466e-aff9-25556b57fe6d
@@ -253,8 +284,15 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
             var deviceInfo = {};
             var jsonBarCode = JSON.parse(barcodeData.text);
             deviceInfo.userId = jsonBarCode.userId || '562992e0ca9ecba67aa0f95d';
-            deviceInfo.devices = BluetoothDiscovery.devices;
+            deviceInfo.devices = [];
             deviceInfo.devices.push({deviceId: $scope.uuid, name: 'My Mobile Phone'});
+
+            for (var d = 0; d < BluetoothDiscovery.devices.length; d++) {
+              var device = {};
+              device.name = BluetoothDiscovery.devices[d]['deviceName'];
+              device.deviceId = BluetoothDiscovery.devices[d]['deviceAddress'];
+              deviceInfo.devices.push(device);
+            }
 
             $scope.userName = jsonBarCode.userName || 'Team Citi';
             $scope.devices = deviceInfo.devices;
