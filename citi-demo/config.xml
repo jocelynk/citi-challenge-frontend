@@ -46,4 +46,5 @@
     <plugin name="cordova-plugin-networkinterface" spec="~1.0.8" />
     <plugin name="com.ionicsdk.discovery" spec="./plugins/cordova-plugin-discovery-master" />
     <plugin name="org.apache.cordova.wifiinfo" spec="./org.apache.cordova.wifiinfo-master" />
+    <plugin name="cordova-plugin-device-orientation" spec="~1.0.1" />
 </widget>

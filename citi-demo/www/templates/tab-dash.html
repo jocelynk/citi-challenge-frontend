@@ -12,26 +12,30 @@
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <span ng-show="showDeviceList">Devices Connected</span>
-        <ion-list>
-          <ion-item class="" ng-repeat="device in devices" type="item-text-wrap" ng-if="showDeviceList">
-            <h2>{{device.deviceName}}</h2>
-
-            <p>{{device.deviceId}}</p>
-          </ion-item>
-        </ion-list>
+ <!--   <div class="row">
+      <div class="col">{{orientation.magneticHeading}}</div>
+      <div class="col">{{orientation.timestamp}}</div>
+    </div>-->
+    <div class="row" ng-show="showDeviceList">
+      <div class="col">
+        <h1>Devices Connected</h1>
+        <div class="list" style="margin-left:20px;" ng-repeat="device in devices track by $index">
+          <div class="item item-divider list-header">Device {{$index+1}}</div>
+          <div class="item item-body list-body">
+            <p style="color:black;font-size:16px;margin-top:0">Device Name: {{device.deviceName}}</p>
+            <p style="color:black;font-size:16px;">Device Id: {{device.deviceId}}</p>
+          </div>
+        </div>
       </div>
     </div>
-   <!-- <div class="container">
+  <!-- <div class="container">
       <div class="row">
         <div class="col-md-12">
           &lt;!&ndash; <button class="button btn" ng-click="scan()">Scan</button>&ndash;&gt;
         </div>
       </div>
-    </div>
-    <div class="list card" ng-model="account" ng-if="showAccount">
+    </div>-->
+    <!--<div class="list card" ng-model="account" ng-if="showAccount">
       <div class="item item-divider">User Account Initiating Connection</div>
       <div class="item item-body">
         <div>

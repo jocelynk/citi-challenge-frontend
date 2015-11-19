@@ -36,7 +36,7 @@ angular.module('starter.services', [])
   .factory('DeviceRegistration', function ($http) {
     var DeviceRegistration = {};
     DeviceRegistration.saveDeviceInfo = function (deviceInfo) {
-      return $http.post('http://10.128.7.83:9000/api/device', deviceInfo);
+      return $http.post('http://192.168.5.1:9000/api/device', deviceInfo);
 
     };
 

@@ -15,51 +15,79 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
     $scope.showDeviceList = false;
     $scope.devices = [];
     $scope.loginInit = false;
+    $scope.orientation = {'magneticHeading': 0, 'timestamp': 0}
 
     $scope.scan = function () {
       $scope.info.bluetoothAddress = BluetoothDiscovery.devices;
       console.log($scope.info);
     };
 
-    $scope.showConfirm = function () {
-      var confirmPopup = $ionicPopup.confirm({
-        title: 'Please Confirm',
-        template: 'Please confirm authentication for account ?'
-      });
+    $scope.showConfirm = function (type) {
+      if (type == 'PUSH') {
+        var confirmPopup = $ionicPopup.confirm({
+          title: 'Please Confirm',
+          template: 'Please confirm authentication for account ?'
+        });
 
 
-      confirmPopup.then(function (res) {
-        if (res) {
-          //$scope.server.close();
+        confirmPopup.then(function (res) {
+          if (res) {
 
-          // server = new WebSocket("ws://10.128.7.83:9000/ws"");
-          /*$scope.server.onopen = function (event) {
-           var obj = {
-           event: 'CONFIRMED',
-           deviceId: $scope.info.deviceId
-           };
+            var obj = {
+              masterId: $scope.info.deviceId,
+              event: 'LOGIN_ACTION_CONFIRMED',
+              deviceId: $scope.info.deviceId
+            };
 
-           $scope.server.send(JSON.stringify(obj));
-           $scope.loginInit = false;
-           //server.close();
-           };*/
+            $scope.devices = BluetoothDiscovery.devices;
 
-          var obj = {
-            masterId: $scope.info.deviceId,
-            event: 'LOGIN_ACTION_CONFIRMED',
-            deviceId: $scope.info.deviceId
+
+            $scope.showDeviceList = true;
+            $scope.server.send(JSON.stringify(obj));
+            $scope.loginInit = false;
+            $scope.showScanning = false;
+          } else {
+          }
+        });
+
+      } else {
+        var myPopup = $ionicPopup.show({
+          template: 'Change the orientation of the device',
+          title: 'Confirm',
+          subTitle: 'Please use normal things',
+          scope: $scope,
+        });
+        if (navigator.compass) {
+          if ($scope.watchId) {
+            navigator.compass.clearWatch($scope.watchId);
+          }
+
+          function onSuccess(heading) {
+            if (Math.abs(heading.magneticHeading - $scope.orientation.magneticHeading) > 60) {
+              var obj = {
+                masterId: $scope.info.deviceId,
+                event: 'LOGIN_ACTION_CONFIRMED',
+                deviceId: $scope.info.deviceId
+              };
+
+              $scope.devices = BluetoothDiscovery.devices;
+
+
+              $scope.showDeviceList = true;
+              $scope.server.send(JSON.stringify(obj));
+              $scope.loginInit = false;
+              $scope.showScanning = false;
+              myPopup.close()
+            };
           };
 
-          $scope.devices = BluetoothDiscovery.devices;
+          function onError(error) {
+            alert('CompassError: ' + error.code);
+          };
 
-
-          $scope.showDeviceList = true;
-          $scope.server.send(JSON.stringify(obj));
-          $scope.loginInit = false;
-          $scope.showScanning = false;
-        } else {
+          navigator.compass.getCurrentHeading(onSuccess, onError);
         }
-      });
+      }
     };
 
     $ionicPlatform.ready(function () {
@@ -74,7 +102,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
             for (var i = 0; i < pluginResult.beacons.length; i++) {
               uniqueBeaconKey = pluginResult.beacons[i].uuid + ":" + pluginResult.beacons[i].major + ":" + pluginResult.beacons[i].minor;
               var originalProximity = '';
-              if(angular.isDefined($scope.info.beacons[uniqueBeaconKey]) && $scope.info.beacons[uniqueBeaconKey] !== null) {
+              if (angular.isDefined($scope.info.beacons[uniqueBeaconKey]) && $scope.info.beacons[uniqueBeaconKey] !== null) {
                 originalProximity = $scope.info.beacons[uniqueBeaconKey]['proximity'];
               }
 
@@ -95,8 +123,8 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
                   break;
               }
 
-             /* if ($scope.loginInit) {
-                if (originalProximity !== $scope.info.beacons[uniqueBeaconKey]['proximity']) {
+              if ($scope.loginInit) {
+                if (originalProximity != $scope.info.beacons[uniqueBeaconKey]['proximity']) {
                   var beaconDevice = {
                     masterId: $scope.info.deviceId,
                     event: "LOGIN_DEVICES",
@@ -104,12 +132,12 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
                     deviceId: pluginResult.beacons[i].uuid,
                     deviceType: "BEACON",
                     proximity: $scope.info.beacons[uniqueBeaconKey]['proximity']
-                  }
+                  };
 
                   $scope.server.send(JSON.stringify(beaconDevice));
                 }
 
-              }*/
+              }
 
             }
             if (!$scope.$$phase) {
@@ -130,7 +158,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       }
       //b9407f30-f5f8-466e-aff9-25556b57fe6d
 
-      $scope.server = new WebSocket("ws://10.128.7.83:9000/ws");
+      $scope.server = new WebSocket("ws://192.168.1.5:9000/ws");
 
       $scope.server.onopen = function (event) {
         var obj = {
@@ -153,6 +181,25 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
         if (event !== null) {
           switch (event.event) {
             case 'LOGIN_INIT':
+            function onSuccess(heading) {
+              $scope.orientation['magneticHeading'] = heading.magneticHeading;
+              $scope.orientation['timestamp'] = heading.timestamp;
+            };
+
+            function onError(compassError) {
+              console.log('Compass error: ' + compassError.code);
+            };
+
+              var options = {
+                frequency: 1000
+              }; // Update every 3 seconds
+
+              if (navigator.compass) {
+                $scope.watchId = navigator.compass.watchHeading(onSuccess, onError, options);
+              }
+
+
+              $scope.showScanning = true;
               $scope.showDeviceList = false;
               $scope.loginInit = true;
               var master = {
@@ -224,7 +271,6 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
     };
 
     BluetoothDiscovery.registerObserverCallback($scope.sendMessage);
-
 
   })
   .
