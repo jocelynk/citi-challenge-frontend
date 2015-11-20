@@ -14,7 +14,7 @@ angular.module('starter.services', [])
   .factory('SocketServer', function () {
     var SocketServer = {};
 
-    SocketServer.server = new WebSocket("ws://10.128.7.83:9000/ws");
+    SocketServer.server = new WebSocket("ws://10.128.13.29:9000/ws");
     SocketServer.server.onopen = function (event) {
       SocketServer.server.send("Message to send");
       console.log(event);
@@ -36,7 +36,7 @@ angular.module('starter.services', [])
   .factory('DeviceRegistration', function ($http) {
     var DeviceRegistration = {};
     DeviceRegistration.saveDeviceInfo = function (deviceInfo) {
-      return $http.post('http://192.168.5.1:9000/api/device', deviceInfo);
+      return $http.post('http://10.128.13.29:9000/api/device', deviceInfo);
 
     };
 
@@ -74,6 +74,7 @@ angular.module('starter.services', [])
       BC.Bluetooth.StartScan();
       BC.Bluetooth.GetPairedDevices(function (mes) {
         for (var i = 0; i < mes.length; i++) {
+          //if address not in here push
           BluetoothDiscovery.pairedDevices.push(mes[i].deviceAddress);
         }
       });

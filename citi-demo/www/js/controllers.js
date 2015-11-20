@@ -78,7 +78,8 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
               $scope.loginInit = false;
               $scope.showScanning = false;
               myPopup.close()
-            };
+            }
+            ;
           };
 
           function onError(error) {
@@ -123,20 +124,17 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
                   break;
               }
 
-              if ($scope.loginInit) {
-                if (originalProximity != $scope.info.beacons[uniqueBeaconKey]['proximity']) {
-                  var beaconDevice = {
-                    masterId: $scope.info.deviceId,
-                    event: "LOGIN_DEVICES",
-                    deviceName: 'ESTIMOTE',
-                    deviceId: pluginResult.beacons[i].uuid,
-                    deviceType: "BEACON",
-                    proximity: $scope.info.beacons[uniqueBeaconKey]['proximity']
-                  };
+              if (originalProximity != $scope.info.beacons[uniqueBeaconKey]['proximity']) {
+                var beaconDevice = {
+                  masterId: $scope.info.deviceId,
+                  event: "LOGIN_DEVICES",
+                  deviceName: 'ESTIMOTE',
+                  deviceId: pluginResult.beacons[i].uuid,
+                  deviceType: "BEACON",
+                  proximity: $scope.info.beacons[uniqueBeaconKey]['proximity']
+                };
 
-                  $scope.server.send(JSON.stringify(beaconDevice));
-                }
-
+                $scope.server.send(JSON.stringify(beaconDevice));
               }
 
             }
@@ -158,7 +156,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       }
       //b9407f30-f5f8-466e-aff9-25556b57fe6d
 
-      $scope.server = new WebSocket("ws://192.168.1.5:9000/ws");
+      $scope.server = new WebSocket("ws://10.128.13.29:9000/ws");
 
       $scope.server.onopen = function (event) {
         var obj = {
@@ -239,7 +237,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
               break;
             case 'LOGIN_ACTION_REQUIRED':
               if ($scope.loginInit) {
-                $scope.showConfirm();
+                $scope.showConfirm('PUSH');
               }
               break;
             default:
