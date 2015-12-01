@@ -11,32 +11,138 @@ angular.module('starter.services', [])
     return DeviceInformation
 
   })
-  .factory('SocketServer', function () {
-    var SocketServer = {};
+  .factory('BeaconInfo', function () {
+    var BeaconInfo = {};
+    BeaconInfo.beacons = {};
+    BeaconInfo.beaconRegions =
+      [
+        {
+          id: 'region1',
+          identifier: 'estimote',
+          uuid:'b9407f30-f5f8-466e-aff9-25556b57fe6d',
+          major: '30201',
+          minor: '10'
+        }
+      ];
 
-    SocketServer.server = new WebSocket("ws://10.128.13.29:9000/ws");
-    SocketServer.server.onopen = function (event) {
-      SocketServer.server.send("Message to send");
-      console.log(event);
+    BeaconInfo.masterDeviceId = null;
+    BeaconInfo.locationManager = null;
+    BeaconInfo.server = null;
+
+    BeaconInfo.getLocationManager = function() {
+      BeaconInfo.locationManager = cordova.plugins.locationManager;
+    };
+
+    BeaconInfo.didRangeBeaconsInRegion = function(pluginResult)
+    {
+      // There must be a beacon within range.
+      if (0 == pluginResult.beacons.length)
+      {
+        return
+      }
+
+      // Our regions are defined so that there is one beacon per region.
+      // Get the first (and only) beacon in range in the region.
+      var beacon = pluginResult.beacons[0];
+      console.log(beacon.proximity);
+      var uniqueBeaconKey = beacon.uuid + ":" + beacon.major + ":" + beacon.minor;
+      //BeaconInfo.beacons[uniqueBeaconKey] = beacon;
+
+      var originalProximity = '';
+      if (angular.isDefined(BeaconInfo.beacons[uniqueBeaconKey]) && BeaconInfo.beacons[uniqueBeaconKey] !== null) {
+        originalProximity = BeaconInfo.beacons[uniqueBeaconKey]['proximity'];
+      }
+
+      BeaconInfo.beacons[uniqueBeaconKey] = beacon;
+
+      if(BeaconInfo.server) {
+
+        switch (BeaconInfo.beacons[uniqueBeaconKey]['proximity']) {
+          case 'ProximityImmediate':
+            BeaconInfo.beacons[uniqueBeaconKey]['proximity'] = 1;
+            break;
+          case 'ProximityNear':
+            BeaconInfo.beacons[uniqueBeaconKey]['proximity'] = 2;
+            break;
+          case 'ProximityFar':
+            BeaconInfo.beacons[uniqueBeaconKey]['proximity'] = 3;
+            break;
+          default:
+            BeaconInfo.beacons[uniqueBeaconKey]['proximity'] = -1;
+            break;
+        }
+
+        if (originalProximity != BeaconInfo.beacons[uniqueBeaconKey]['proximity']) {
+          var beaconDevice = {
+            masterId: BeaconInfo.masterDeviceId,
+            event: "LOGIN_DEVICES",
+            deviceName: 'ESTIMOTE',
+            deviceId: BeaconInfo.beacons[uniqueBeaconKey].uuid,
+            deviceType: "BEACON",
+            proximity: BeaconInfo.beacons[uniqueBeaconKey]['proximity']
+          };
+
+          BeaconInfo.server.send(JSON.stringify(beaconDevice));
+          //$scope.server.send(JSON.stringify(beaconDevice));
+        }
+
+      }
 
     };
 
-    SocketServer.server.onmessage = function (event) {
-      console.log(event);
+    BeaconInfo.startScanForBeacons = function()
+    {
+      //console.log('startScanForBeacons')
 
+      // The delegate object contains iBeacon callback functions.
+      // The delegate object contains iBeacon callback functions.
+      var delegate = new cordova.plugins.locationManager.Delegate();
+
+      delegate.didDetermineStateForRegion = function(pluginResult)
+      {
+        //console.log('didDetermineStateForRegion: ' + JSON.stringify(pluginResult))
+      };
+
+      delegate.didStartMonitoringForRegion = function(pluginResult)
+      {
+        //console.log('didStartMonitoringForRegion:' + JSON.stringify(pluginResult))
+      };
+
+      delegate.didRangeBeaconsInRegion = function(pluginResult)
+      {
+        //console.log('didRangeBeaconsInRegion: ' + JSON.stringify(pluginResult))
+        BeaconInfo.didRangeBeaconsInRegion(pluginResult)
+      };
+
+      // Set the delegate object to use.
+      BeaconInfo.locationManager.setDelegate(delegate);
+
+      // Start monitoring and ranging our beacons.
+      for (var r = 0; r < BeaconInfo.beaconRegions.length; r++)
+      {
+        var region = BeaconInfo.beaconRegions[r];
+
+        var beaconRegion = new BeaconInfo.locationManager.BeaconRegion(
+          region.identifier, region.uuid, region.major, region.minor);
+
+        // Start monitoring.
+        BeaconInfo.locationManager.startMonitoringForRegion(beaconRegion)
+          .fail(console.error)
+          .done();
+
+        // Start ranging.
+        BeaconInfo.locationManager.startRangingBeaconsInRegion(beaconRegion)
+          .fail(console.error)
+          .done()
+      }
     };
 
-    SocketServer.server.onclose = function (event) {
-      console.log(event)
-    };
-
-    return SocketServer;
-
+    return BeaconInfo;
   })
   .factory('DeviceRegistration', function ($http) {
     var DeviceRegistration = {};
     DeviceRegistration.saveDeviceInfo = function (deviceInfo) {
-      return $http.post('http://10.128.13.29:9000/api/device', deviceInfo);
+      return $http.post('http://10.128.10.24:9000/api/device', deviceInfo);
 
     };
 
