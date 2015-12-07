@@ -149,8 +149,8 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
                   event: "LOGIN_DEVICES",
                   deviceId: $scope.info.deviceId,
                   deviceType: "SMART_PHONE",
-                  wifiSSID: $scope.info.wifiSSID,
-                  ipAddress: $scope.info.ipAddress
+                  wifiSSID: 'eduroam',//$scope.info.wifiSSID,
+                  ipAddress: '10.128.9.49'//$scope.info.ipAddress
                 };
                 $scope.server.send(JSON.stringify(master));
 
@@ -204,53 +204,6 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
         BeaconInfo.server = $scope.server;
         BeaconInfo.getLocationManager();
         BeaconInfo.startScanForBeacons();
-        /*$rootScope.$on("$cordovaBeacon:didRangeBeaconsInRegion", function (event, pluginResult) {
-            var uniqueBeaconKey;
-            for (var i = 0; i < pluginResult.beacons.length; i++) {
-              uniqueBeaconKey = pluginResult.beacons[i].uuid + ":" + pluginResult.beacons[i].major + ":" + pluginResult.beacons[i].minor;
-              var originalProximity = '';
-              if (angular.isDefined($scope.info.beacons[uniqueBeaconKey]) && $scope.info.beacons[uniqueBeaconKey] !== null) {
-                originalProximity = $scope.info.beacons[uniqueBeaconKey]['proximity'];
-              }
-
-              $scope.info.beacons[uniqueBeaconKey] = pluginResult.beacons[i];
-
-              switch ($scope.info.beacons[uniqueBeaconKey]['proximity']) {
-                case 'ProximityImmediate':
-                  $scope.info.beacons[uniqueBeaconKey]['proximity'] = 1;
-                  break;
-                case 'ProximityNear':
-                  $scope.info.beacons[uniqueBeaconKey]['proximity'] = 2;
-                  break;
-                case 'ProximityFar':
-                  $scope.info.beacons[uniqueBeaconKey]['proximity'] = 3;
-                  break;
-                default:
-                  $scope.info.beacons[uniqueBeaconKey]['proximity'] = -1;
-                  break;
-              }
-
-              if (originalProximity != $scope.info.beacons[uniqueBeaconKey]['proximity']) {
-                var beaconDevice = {
-                  masterId: $scope.info.deviceId,
-                  event: "LOGIN_DEVICES",
-                  deviceName: 'ESTIMOTE',
-                  deviceId: pluginResult.beacons[i].uuid,
-                  deviceType: "BEACON",
-                  proximity: $scope.info.beacons[uniqueBeaconKey]['proximity']
-                };
-
-                $scope.server.send(JSON.stringify(beaconDevice));
-              }
-
-            }
-            if (!$scope.$$phase) {
-              $scope.$apply();
-            }
-          }
-        )*/
-
-        //$cordovaBeacon.startRangingBeaconsInRegion($cordovaBeacon.createBeaconRegion("estimote", "b9407f30-f5f8-466e-aff9-25556b57fe6d"));
 
         navigator.wifi.getWifiInfo(function (wifiInfo) {
           $scope.info.wifiSSID = wifiInfo.connection.SSID;
@@ -260,10 +213,6 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
         }, [{}]);
       }
       //b9407f30-f5f8-466e-aff9-25556b57fe6d
-
-
-
-
     });
 
     $scope.sendMessage = function (device) {
