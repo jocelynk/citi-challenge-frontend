@@ -100,7 +100,7 @@ angular.module('starter.controllers', ['starter.services', 'ngCordova', 'ngCordo
       if (window.cordova) {
         $scope.info.deviceId = $cordovaDevice.getUUID();
 
-        $scope.server = new WebSocket("ws://10.128.10.24:9000/ws");
+        $scope.server = new WebSocket("ws://calm-sands-9581.herokuapp.com/ws");
 
         $scope.server.onopen = function (event) {
           var obj = {
