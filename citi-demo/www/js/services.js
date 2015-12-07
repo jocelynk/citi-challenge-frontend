@@ -142,7 +142,7 @@ angular.module('starter.services', [])
   .factory('DeviceRegistration', function ($http) {
     var DeviceRegistration = {};
     DeviceRegistration.saveDeviceInfo = function (deviceInfo) {
-      return $http.post('http://calm-sands-9581.herokuapp.com/api/device', deviceInfo);
+      return $http.post('http://citimesh.herokuapp.com/api/device', deviceInfo);
 
     };
 
